@@ -7,7 +7,6 @@ namespace Interpretator
         public LexemeType Type { get; private set; }
         public string Value { get; private set; }
 
-
         public Lexeme(LexemeType type, String value)
         {
             Type = type;
