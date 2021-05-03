@@ -9,7 +9,9 @@
         OP_MINUS, 
         OP_MUL, 
         OP_DIV,
-        NUMBER, 
+        NUMBER,
+        NAME,
+        COMMA,
         EOF
     }
 }

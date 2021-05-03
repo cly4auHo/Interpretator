@@ -5,8 +5,8 @@ using System.Text;
 namespace Interpretator
 {
     /*------------------------------------------------------------------
-     * PARSER RULES
-     *------------------------------------------------------------------*/
+   * PARSER RULES
+   *------------------------------------------------------------------*/
 
     //    expr : plusminus* EOF ;
     //
@@ -14,10 +14,16 @@ namespace Interpretator
     //
     //    multdiv : factor ( ( '*' | '/' ) factor )* ;
     //
-    //    factor : NUMBER | '(' expr ')' ;
+    //    factor : func | unary | NUMBER | '(' expr ')' ;
+    //
+    //    unary : '-' factor
+    //
+    //    func : NAME '(' (expr (',' expr)+)? ')'
 
     public class Interpretator
     {
+        private Dictionary<string, IFunction> functionMap = GetFunctionMap();
+
         public List<Lexeme> LexAnalyze(string expText)
         {
             List<Lexeme> lexemes = new List<Lexeme>();
@@ -25,7 +31,7 @@ namespace Interpretator
 
             while (pos < expText.Length)
             {
-                char c = expText.ToCharArray()[pos];
+                char c = expText[pos];
 
                 if (c == '(')
                 {
@@ -63,6 +69,12 @@ namespace Interpretator
                     pos++;
                     continue;
                 }
+                else if (c == ',')
+                {
+                    lexemes.Add(new Lexeme(LexemeType.COMMA, c));
+                    pos++;
+                    continue;
+                }
                 else
                 {
                     if (c <= '9' && c >= '0')
@@ -75,11 +87,9 @@ namespace Interpretator
                             pos++;
 
                             if (pos >= expText.Length)
-                            {
                                 break;
-                            }
 
-                            c = expText.ToCharArray()[pos];
+                            c = expText[pos];
 
                         } while (c <= '9' && c >= '0');
 
@@ -89,10 +99,36 @@ namespace Interpretator
                     {
                         if (c != ' ')
                         {
-                            throw new Exception("Unexpected character: " + c);
-                        }
+                            if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
+                            {
+                                StringBuilder sb = new StringBuilder();
 
-                        pos++;
+                                do
+                                {
+                                    sb.Append(c.ToString().ToUpper());
+                                    pos++;
+
+                                    if (pos >= expText.Length)
+                                        break;
+
+                                    c = expText[pos];
+
+                                } while (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
+
+                                if (functionMap.ContainsKey(sb.ToString()))
+                                {
+                                    lexemes.Add(new Lexeme(LexemeType.NAME, sb.ToString()));
+                                }
+                                else
+                                {
+                                    throw new Exception("Unexpected character: " + c);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            pos++;
+                        }
                     }
                 }
             }
@@ -135,6 +171,7 @@ namespace Interpretator
                         break;
                     case LexemeType.EOF:
                     case LexemeType.RIGHT_BRACKET:
+                    case LexemeType.COMMA:
                         lexemes.Back();
                         return value;
                     default:
@@ -163,6 +200,7 @@ namespace Interpretator
                     case LexemeType.RIGHT_BRACKET:
                     case LexemeType.OP_PLUS:
                     case LexemeType.OP_MINUS:
+                    case LexemeType.COMMA:
                         lexemes.Back();
                         return value;
                     default:
@@ -179,8 +217,14 @@ namespace Interpretator
             {
                 case LexemeType.NUMBER:
                     return int.Parse(lexeme.Value);
+                case LexemeType.NAME:
+                    lexemes.Back();
+                    return Func(lexemes);
+                case LexemeType.OP_MINUS:
+                    int value = Factor(lexemes);
+                    return -value;
                 case LexemeType.LEFT_BRACKET:
-                    int value = Plusminus(lexemes);
+                    value = Plusminus(lexemes);
                     lexeme = lexemes.Next();
 
                     if (lexeme.Type != LexemeType.RIGHT_BRACKET)
@@ -192,6 +236,53 @@ namespace Interpretator
                 default:
                     throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.GetPos());
             }
+        }
+
+        private int Func(LexemeBuffer lexemeBuffer)
+        {
+            string name = lexemeBuffer.Next().Value;
+            Lexeme lexeme = lexemeBuffer.Next();
+
+            if (lexeme.Type != LexemeType.LEFT_BRACKET)
+            {
+                throw new Exception("Wrong function call syntax at " + lexeme.Value);
+            }
+
+            List<int> args = new List<int>();
+            lexeme = lexemeBuffer.Next();
+
+            if (lexeme.Type != LexemeType.RIGHT_BRACKET)
+            {
+                lexemeBuffer.Back();
+
+                do
+                {
+                    args.Add(Expr(lexemeBuffer));
+                    lexeme = lexemeBuffer.Next();
+
+                    if (lexeme.Type != LexemeType.COMMA && lexeme.Type != LexemeType.RIGHT_BRACKET)
+                    {
+                        throw new Exception("Wrong function call syntax at " + lexeme.Value);
+                    }
+
+                } while (lexeme.Type == LexemeType.COMMA);
+            }
+
+
+            functionMap.TryGetValue(name, out IFunction value);
+            return value.Apply(args);
+        }
+
+        private static Dictionary<string, IFunction> GetFunctionMap()
+        {
+            Dictionary<string, IFunction> functionTable = new Dictionary<string, IFunction>();
+            functionTable.Add(Functions.MIN.ToString(), new Min());
+            functionTable.Add(Functions.POW.ToString(), new Pow());
+            functionTable.Add(Functions.RAND.ToString(), new Rand());
+            functionTable.Add(Functions.RANDOM.ToString(), new Rand());
+            functionTable.Add(Functions.AVG.ToString(), new Avg());
+
+            return functionTable;
         }
     }
 }

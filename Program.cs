@@ -7,13 +7,13 @@ namespace Interpretator
     {
         public static void Main(string[] args)
         {
-            string expressionText = "10 - 4 * (2 + 2/8) -1 ";
+            string expressionText = "avg(3, 4, 2 * 3 + pow(2,3)) - min(-1, 3)";
 
             Interpretator interpretator = new Interpretator();
             List<Lexeme> lexemes = interpretator.LexAnalyze(expressionText);
-            LexemeBuffer lexemeBuffer = new LexemeBuffer(lexemes);
-
-            Console.WriteLine(interpretator.Expr(lexemeBuffer));
+            LexemeBuffer lexemeBuffer = new LexemeBuffer(lexemes);  
+            
+            Console.WriteLine(interpretator.Expr(lexemeBuffer)); //output: 8
         }     
     }
 }
