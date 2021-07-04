@@ -5,26 +5,16 @@ namespace Interpretator
     public class LexemeBuffer
     {
         private readonly List<Lexeme> lexemes;
-        private int pos;
+        private int position;
 
+        public Lexeme Next => lexemes[position++];
+        public int Position => position;
+
+        public void Back() => position--;
+        
         public LexemeBuffer(List<Lexeme> lexemes)
         {
             this.lexemes = lexemes;
-        }
-
-        public Lexeme Next()
-        {
-            return lexemes[pos++];
-        }
-
-        public void Back()
-        {
-            pos--;
-        }
-
-        public int GetPos()
-        {
-            return pos;
         }
     }
 }

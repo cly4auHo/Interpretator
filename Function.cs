@@ -12,21 +12,15 @@ namespace Interpretator
     {
         public int Apply(List<int> args)
         {
-            if (args.Count == 0)
-            {
+            if (args.Count == 0)         
                 throw new Exception("No arguments for function min");
-            }
-
+           
             int min = args[0];
 
-            foreach (int val in args)
-            {
-                if (val < min)
-                {
+            foreach (int val in args)          
+                if (val < min)              
                     min = val;
-                }
-            }
-
+                        
             return min;
         }
     }
@@ -38,11 +32,8 @@ namespace Interpretator
 
         public int Apply(List<int> args)
         {
-
-            if (args.Count != 0)
-            {
-                throw new Exception("Wrong argument count for function rand");
-            }
+            if (args.Count != 0)          
+                throw new Exception("Wrong argument count for function rand");         
 
             return (int)(random.NextDouble() * RANDOMIZER);
         }
@@ -57,11 +48,9 @@ namespace Interpretator
     {
         public int Apply(List<int> args)
         {
-            if (args.Count != 2)
-            {
+            if (args.Count != 2)          
                 throw new Exception("Wrong argument count for function pow: " + args.Count);
-            }
-
+           
             return (int)Math.Pow(args[0], args[1]);
         }
     }
@@ -75,11 +64,9 @@ namespace Interpretator
 
             int sum = 0;
 
-            for (int i = 0; i < args.Count; i++)
-            {
+            for (int i = 0; i < args.Count; i++)        
                 sum += args[i];
-            }
-
+           
             return sum / args.Count;
         }
     }

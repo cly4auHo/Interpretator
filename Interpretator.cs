@@ -115,14 +115,10 @@ namespace Interpretator
 
                                 } while (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
 
-                                if (functionMap.ContainsKey(sb.ToString()))
-                                {
-                                    lexemes.Add(new Lexeme(LexemeType.NAME, sb.ToString()));
-                                }
-                                else
-                                {
-                                    throw new Exception("Unexpected character: " + c);
-                                }
+                                if (functionMap.ContainsKey(sb.ToString()))                              
+                                    lexemes.Add(new Lexeme(LexemeType.NAME, sb.ToString()));                              
+                                else                          
+                                    throw new Exception("Unexpected character: " + c);                              
                             }
                         }
                         else
@@ -140,12 +136,10 @@ namespace Interpretator
 
         public int Expr(LexemeBuffer lexemes)
         {
-            Lexeme lexeme = lexemes.Next();
+            Lexeme lexeme = lexemes.Next;
 
-            if (lexeme.Type == LexemeType.EOF)
-            {
-                return 0;
-            }
+            if (lexeme.Type == LexemeType.EOF)          
+                return 0;           
             else
             {
                 lexemes.Back();
@@ -159,7 +153,7 @@ namespace Interpretator
 
             while (true)
             {
-                Lexeme lexeme = lexemes.Next();
+                Lexeme lexeme = lexemes.Next;
 
                 switch (lexeme.Type)
                 {
@@ -175,7 +169,7 @@ namespace Interpretator
                         lexemes.Back();
                         return value;
                     default:
-                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.GetPos());
+                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.Position);
                 }
             }
         }
@@ -186,7 +180,7 @@ namespace Interpretator
 
             while (true)
             {
-                Lexeme lexeme = lexemes.Next();
+                Lexeme lexeme = lexemes.Next;
 
                 switch (lexeme.Type)
                 {
@@ -204,14 +198,14 @@ namespace Interpretator
                         lexemes.Back();
                         return value;
                     default:
-                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.GetPos());
+                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.Position);
                 }
             }
         }
 
         private int Factor(LexemeBuffer lexemes)
         {
-            Lexeme lexeme = lexemes.Next();
+            Lexeme lexeme = lexemes.Next;
 
             switch (lexeme.Type)
             {
@@ -225,31 +219,27 @@ namespace Interpretator
                     return -value;
                 case LexemeType.LEFT_BRACKET:
                     value = Plusminus(lexemes);
-                    lexeme = lexemes.Next();
+                    lexeme = lexemes.Next;
 
-                    if (lexeme.Type != LexemeType.RIGHT_BRACKET)
-                    {
-                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.GetPos());
-                    }
+                    if (lexeme.Type != LexemeType.RIGHT_BRACKET)                  
+                        throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.Position);                   
 
                     return value;
                 default:
-                    throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.GetPos());
+                    throw new Exception("Unexpected token: " + lexeme.Value + " at position: " + lexemes.Position);
             }
         }
 
         private int Func(LexemeBuffer lexemeBuffer)
         {
-            string name = lexemeBuffer.Next().Value;
-            Lexeme lexeme = lexemeBuffer.Next();
+            string name = lexemeBuffer.Next.Value;
+            Lexeme lexeme = lexemeBuffer.Next;
 
-            if (lexeme.Type != LexemeType.LEFT_BRACKET)
-            {
+            if (lexeme.Type != LexemeType.LEFT_BRACKET)          
                 throw new Exception("Wrong function call syntax at " + lexeme.Value);
-            }
-
+           
             List<int> args = new List<int>();
-            lexeme = lexemeBuffer.Next();
+            lexeme = lexemeBuffer.Next;
 
             if (lexeme.Type != LexemeType.RIGHT_BRACKET)
             {
@@ -258,16 +248,12 @@ namespace Interpretator
                 do
                 {
                     args.Add(Expr(lexemeBuffer));
-                    lexeme = lexemeBuffer.Next();
+                    lexeme = lexemeBuffer.Next;
 
-                    if (lexeme.Type != LexemeType.COMMA && lexeme.Type != LexemeType.RIGHT_BRACKET)
-                    {
-                        throw new Exception("Wrong function call syntax at " + lexeme.Value);
-                    }
-
+                    if (lexeme.Type != LexemeType.COMMA && lexeme.Type != LexemeType.RIGHT_BRACKET)                  
+                        throw new Exception("Wrong function call syntax at " + lexeme.Value);                 
                 } while (lexeme.Type == LexemeType.COMMA);
             }
-
 
             functionMap.TryGetValue(name, out IFunction value);
             return value.Apply(args);
