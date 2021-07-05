@@ -22,7 +22,7 @@ namespace Interpretator
 
     public class Interpretator
     {
-        private Dictionary<string, IFunction> functionMap = GetFunctionMap();
+        private readonly IReadOnlyDictionary<string, IFunction> functionMap;
 
         public List<Lexeme> LexAnalyze(string expText)
         {
@@ -259,16 +259,16 @@ namespace Interpretator
             return value.Apply(args);
         }
 
-        private static Dictionary<string, IFunction> GetFunctionMap()
+        public Interpretator()
         {
-            Dictionary<string, IFunction> functionTable = new Dictionary<string, IFunction>();
-            functionTable.Add(Functions.MIN.ToString(), new Min());
-            functionTable.Add(Functions.POW.ToString(), new Pow());
-            functionTable.Add(Functions.RAND.ToString(), new Rand());
-            functionTable.Add(Functions.RANDOM.ToString(), new Rand());
-            functionTable.Add(Functions.AVG.ToString(), new Avg());
-
-            return functionTable;
+            functionMap = new Dictionary<string, IFunction>
+            {
+                { Functions.MIN.ToString(), new Min() },
+                { Functions.POW.ToString(), new Pow() },
+                { Functions.RAND.ToString(), new Rand() },
+                { Functions.RANDOM.ToString(), new Rand() },
+                { Functions.AVG.ToString(), new Avg() }
+            };
         }
     }
 }
